@@ -45,7 +45,8 @@ class NalaTester:
             body = [
                 "".join(map(lambda t: f"TESTS += {t}\n", self.conf.transpile_filenames)),
                 "".join(map(lambda s: f"SRC += {s}\n", self.conf.c_src)),
-                "".join(map(lambda l: f"LIB += {l}\n", self.conf.lib)),
+                "CFLAGS += -L. \n",
+                "".join(map(lambda l: f"LIBS += {l}\n", self.conf.lib)),
                 # TODO add -.L "test_dir_shift"
             ]
             body_str = "\n".join(body)
