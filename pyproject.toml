@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "see-test"
+version = "0.1.0"
+description = ""
+authors = ["Félix Jullien <jullienfelix@gmail.com>"]
+readme = "README.md"
+packages = [{include = "see_test"}]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+tree-sitter = "^0.20.1"
+python-slugify = "^6.1.2"
+typer = "^0.6.1"
+rich = "^12.6.0"
+watchdog = "^2.1.9"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+stt = 'see_test.cli.cli:app'

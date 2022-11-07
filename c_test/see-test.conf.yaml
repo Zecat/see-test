@@ -1,0 +1,6 @@
+c_src:
+- add.c
+lib: []
+st_src:
+- test.st
+test_dir: tests
