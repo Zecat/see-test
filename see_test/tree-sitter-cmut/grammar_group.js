@@ -7,14 +7,23 @@ module.exports = grammar({
   ],
   
   rules: {
-    source_file: $ => seq($.includes, repeat($.subgroup)),
+    source_file: $ => seq($.includes, repeat($.group)),
 
-    includes: $ => /[^-]*/,
+    includes: $ => /[^===]*/,
+
+    group: $ => seq(
+      /===+\n/,
+      field('name', $.group_name),
+      repeat(choice($._c_code, $.function_alias_definition)),
+      repeat($.subgroup)
+    ),
 
     subgroup: $ => seq(
       $._subgroup_line,
       repeat(choice( $.function_alias_definition, $._c_code, $.call_expression))
     ),
+
+    group_name: $ => /.+/,
 
     _subgroup_line: $ => seq(/- */, field('name', $.subgroup_name)),
 

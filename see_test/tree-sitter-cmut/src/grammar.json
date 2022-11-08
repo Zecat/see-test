@@ -12,54 +12,14 @@
           "type": "REPEAT",
           "content": {
             "type": "SYMBOL",
-            "name": "group"
+            "name": "subgroup"
           }
         }
       ]
     },
     "includes": {
       "type": "PATTERN",
-      "value": "[^===]*"
-    },
-    "group": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "PATTERN",
-          "value": "===+\\n"
-        },
-        {
-          "type": "FIELD",
-          "name": "name",
-          "content": {
-            "type": "SYMBOL",
-            "name": "group_name"
-          }
-        },
-        {
-          "type": "REPEAT",
-          "content": {
-            "type": "CHOICE",
-            "members": [
-              {
-                "type": "SYMBOL",
-                "name": "_c_code"
-              },
-              {
-                "type": "SYMBOL",
-                "name": "function_alias_definition"
-              }
-            ]
-          }
-        },
-        {
-          "type": "REPEAT",
-          "content": {
-            "type": "SYMBOL",
-            "name": "subgroup"
-          }
-        }
-      ]
+      "value": "[^-]*"
     },
     "subgroup": {
       "type": "SEQ",
@@ -89,10 +49,6 @@
           }
         }
       ]
-    },
-    "group_name": {
-      "type": "PATTERN",
-      "value": ".+"
     },
     "_subgroup_line": {
       "type": "SEQ",
@@ -485,7 +441,7 @@
               },
               {
                 "type": "PATTERN",
-                "value": "[^*]*\\*+([^/*][^*]*\\*+)*"
+                "value": "[^*]*\\*+([^\\/*][^*]*\\*+)*"
               },
               {
                 "type": "STRING",

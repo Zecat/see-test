@@ -26,12 +26,6 @@ node_type_to_c_var_conf = {
     "char": {"c_type": "int", "name": "char"},
 }
 
-node_type_to_cmocka_assert_fn = {
-    "string": lambda a, b: str(c.fcall("assert_string_equal", [a, b]) + ";"),
-    "number": lambda a, b: str(c.fcall("assert_int_equal", [a, b]) + ";"),
-    "char": lambda a, b: str(c.fcall("assert_memory_equal", [a, b, 1]) + ";"),
-}
-
 node_type_to_c_var_conf.setdefault("ptr_count", 0)
 node_type_to_c_var_conf.setdefault("arr_dim", 0)
 
@@ -176,17 +170,13 @@ class TestCallExpression:
         errput_var = "input" + str(self.vars_block.var_counter.add_var("errput"))
         # HERE
         ouput_assertion_str = self.get_eq_assertion_str(
-            "stdout_buffer", expect_output_text, "string"
+            output_var, expect_output_text, "string"
         )
         # HERE
-        # self.body.append(f"CAPTURE_OUTPUT({output_var}, {errput_var})" + " {")
-        # self.body.append("    "+fn_call_str)
-        self.body.append("CAPTURE_STDOUT_START")
-        self.body.append(fn_call_str)
-        self.body.append("CAPTURE_STDOUT_STOP")
+        self.body.append(f"CAPTURE_OUTPUT({output_var}, {errput_var})" + " {")
+        self.body.append("    " + fn_call_str)
         # HERE
-        # self.body.append("}\n\n" + ouput_assertion_str)
-        self.body.append(ouput_assertion_str)
+        self.body.append("}\n\n" + ouput_assertion_str)
 
     def add_call_expression_from_node(self, node):
         name_node = node.child_by_field_name("name")
@@ -225,8 +215,7 @@ class TestCallExpression:
 
     # HERE
     def get_eq_assertion_str(self, a, b, node_type):
-        return node_type_to_cmocka_assert_fn[node_type](a, b)
-        # return str(c.fcall("ASSERT_EQ", [a, b]) + ";")
+        return str(c.fcall("ASSERT_EQ", [a, b]) + ";")
 
 
 def format_c_code_block(str):
@@ -238,23 +227,19 @@ def format_c_code_block(str):
 
 
 class TestSubgroupTS:
-    def __init__(
-        self, node, get_node_text, function_aliases={}, vars_counter=VarsCounter()
-    ):  # TODO cleanup function_aliases & vars_counter
+    def __init__(self, node, vars_counter, get_node_text, function_aliases):
         self.get_node_text = get_node_text
         self.function_aliases = function_aliases
         name_node, *child_nodes = node.children
-        self.name = slugify(
-            self.get_node_text(name_node), separator="_", max_length=100, lowercase=True
-        )
+        self.name = self.get_node_text(name_node)
         self.body = []
-        # self.body.append(c.comment("---- " + self.name + " ----"))
+        self.body.append(c.comment("---- " + self.name + " ----"))
         is_not_implemented = self.name[0] == "@"
         # HERE
         if is_not_implemented:
-            #  self.body.append(
-            #  f'printf("\033[1;33mIGNORED\033[m%s\\n", "{self.name[1:]}");'
-            #  )
+            self.body.append(
+                f'printf("\033[1;33mIGNORED\033[m%s\\n", "{self.name[1:]}");'
+            )
             return
 
         for child_node in child_nodes:
@@ -279,54 +264,50 @@ class TestSubgroupTS:
                     c.comment(f"Subgroup scope alias: {alias_name} -> {function_name}")
                 )
 
-        #  if not is_not_implemented:
-        # HERE
-        # self.body.append(f'printf("\033[33m%s: PASS\033[m\\n", "{self.name}");')
+        if not is_not_implemented:
+            # HERE
+            self.body.append(f'printf("\033[33m%s: PASS\033[m\\n", "{self.name}");')
 
     def __str__(self):
-        self.body.append("(void) state;")
-        return c.fdef(
-            f"static void {self.name}(void **state)", "\n\n".join(map(str, self.body))
-        )
+        return "\n\n".join(map(str, self.body))
 
 
-# class TestGroupTS:
-#    def __init__(self, group_node, get_node_text):
-#        self.get_node_text = get_node_text
-#        group_name_node, *child_nodes = group_node.children
-#        group_name = self.get_node_text(group_name_node)
-#        self.slug = slugify(group_name, separator="_", max_length=100, lowercase=True)
-#        vars_counter = VarsCounter()
-#        self.body = []
-#        function_aliases = {}
-#        for child_node in child_nodes:
-#            if child_node.type == "c_code":
-#                c_code_block = self.get_node_text(child_node)
-#                c_code_block = format_c_code_block(c_code_block)
-#                self.body.append(c_code_block)
-#            elif child_node.type == "subgroup":
-#                self.body.append(
-#                    TestSubgroupTS(
-#                        child_node,
-#                        vars_counter,
-#                        self.get_node_text,
-#                        copy.deepcopy(function_aliases),
-#                    )
-#                )
-#            elif child_node.type == "function_alias_definition":
-#                alias_name_node = child_node.child_by_field_name("alias_name")
-#                function_name_node = child_node.child_by_field_name("function_name")
-#                alias_name = self.get_node_text(alias_name_node)
-#                function_name = self.get_node_text(function_name_node)
-#                function_aliases[alias_name] = function_name
-#                self.body.append(
-#                    c.comment(f"Group scope alias: {alias_name} -> {function_name}")
-#                )
-#
-#    def __str__(self):
-#        # HERE
-#        #return c.function("TEST", self.slug, "\n" + "\n\n".join(map(str, self.body)))
-#        return
+class TestGroupTS:
+    def __init__(self, group_node, get_node_text):
+        self.get_node_text = get_node_text
+        group_name_node, *child_nodes = group_node.children
+        group_name = self.get_node_text(group_name_node)
+        self.slug = slugify(group_name, separator="_", max_length=100, lowercase=True)
+        vars_counter = VarsCounter()
+        self.body = []
+        function_aliases = {}
+        for child_node in child_nodes:
+            if child_node.type == "c_code":
+                c_code_block = self.get_node_text(child_node)
+                c_code_block = format_c_code_block(c_code_block)
+                self.body.append(c_code_block)
+            elif child_node.type == "subgroup":
+                self.body.append(
+                    TestSubgroupTS(
+                        child_node,
+                        vars_counter,
+                        self.get_node_text,
+                        copy.deepcopy(function_aliases),
+                    )
+                )
+            elif child_node.type == "function_alias_definition":
+                alias_name_node = child_node.child_by_field_name("alias_name")
+                function_name_node = child_node.child_by_field_name("function_name")
+                alias_name = self.get_node_text(alias_name_node)
+                function_name = self.get_node_text(function_name_node)
+                function_aliases[alias_name] = function_name
+                self.body.append(
+                    c.comment(f"Group scope alias: {alias_name} -> {function_name}")
+                )
+
+    def __str__(self):
+        # HERE
+        return c.function("TEST", self.slug, "\n" + "\n\n".join(map(str, self.body)))
 
 
 class TestFile:
@@ -336,13 +317,12 @@ class TestFile:
         # TODO split parser + root node generation in different function
         self.root_node = tree.root_node
         # print(self.root_node.sexp())
-        includes_node, *group_nodes = self.root_node.children
-        self.includes_str = self.get_node_text(includes_node)
-        self.groups = list(
-            map(lambda node: TestSubgroupTS(node, self.get_node_text), group_nodes)
+        includes, *group_nodes = self.root_node.children
+        includes_str = self.get_node_text(includes)
+        groups = list(
+            map(lambda node: TestGroupTS(node, self.get_node_text), group_nodes)
         )
-
-        # self.body = [includes_str] + selfgroups
+        self.body = [includes_str] + groups
 
     def read_callable(self, byte_offset, point):
         return self.src[byte_offset : byte_offset + 1]
@@ -352,27 +332,7 @@ class TestFile:
         return self.src[node.start_byte : node.end_byte].decode("utf8")
 
     def __str__(self):
-        return (
-            self.includes_str
-            + "\n\n".join(map(str, self.groups))
-            + "\n\n"
-            + self.cmocka_main_str()
-        )  # = "\n".join(map(str, self.body))
-
-    def cmocka_main_str(self):
-        return (
-            """int main(void) {
-    const struct CMUnitTest tests[] = {
-        """
-            + "\n        ".join(self.get_cmocka_unit_tests())
-            + """
-    };
-    return cmocka_run_group_tests(tests, NULL, NULL);
-}"""
-        )
-
-    def get_cmocka_unit_tests(self):
-        return map(lambda group: f"cmocka_unit_test({group.name}),", self.groups)
+        return "\n".join(map(str, self.body))
 
 
 def transpile_cmut_file(path):
@@ -392,19 +352,9 @@ def generate_cmut_file(path_in, path_out, path_shift=None):
         #   => #include "../../my_import.h"
         cmut_str = re.sub(r'([\s]*#[\s]*include[\s]*")', rf"\1{path_shift}/", cmut_str)
     # HERE
-    # test_framework_includes = '#include "nala.h"\n'
-    test_framework_includes = """#include <stdarg.h>
-#include <stddef.h>
-#include <setjmp.h>
-#include <cmocka.h>
-
-#include "capture_macro.h"
-
-CAPTURE_INIT
-
-"""
+    nala_include = '#include "nala.h"\n'
     # TODO what's the best way to do it ?
-    cmut_str = test_framework_includes + cmut_str
+    cmut_str = nala_include + cmut_str
 
     with open(path_out, "w") as out_file:
         out_file.write(cmut_str)

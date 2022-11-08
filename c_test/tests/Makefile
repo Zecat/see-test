@@ -4,5 +4,7 @@ TESTS += test.c
 
 SRC += ../add.c
 
+LDFLAGS += -L. 
+
 
 include test.mk

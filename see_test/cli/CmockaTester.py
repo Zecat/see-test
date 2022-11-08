@@ -9,7 +9,7 @@ WARN_AUTO_GENERATED_FILE = (
 )
 
 
-class NalaTester:
+class CmockaTester:
     def __init__(self, conf: Conf) -> None:
         self.conf = conf
 
@@ -19,21 +19,25 @@ class NalaTester:
             "--silent",
             "--directory",
             self.conf.test_dirpath,
+            "test",
         ]  # TODO test_dir asbolute or relative to where the script is launched
         if live_reload:
             cmd.append("auto")
 
         run(cmd)
 
-    def get_nala_mk_file(self) -> Path:
-        return (Path(__loader__.path) / "../../../templates/test.mk").resolve()
+    def get_template_dir(self) -> Path:
+        return (Path(__loader__.path) / "../../../templates/cmocka").resolve()
 
     def init(self) -> None:
         test_dirpath = self.conf.test_dirpath
         if not test_dirpath.exists():
             Path.mkdir(test_dirpath)
-        mk_file = test_dirpath / "test.mk"
-        shutil.copy(self.get_nala_mk_file(), mk_file)
+        shutil.copy(self.get_template_dir() / "test.mk", test_dirpath / "test.mk")
+        shutil.copy(
+            self.get_template_dir() / "capture_macro.h",
+            test_dirpath / "capture_macro.h",
+        )
         self.update()
 
     def update(self) -> None:
@@ -47,8 +51,8 @@ class NalaTester:
                     map(lambda t: f"TESTS += {t}\n", self.conf.transpile_filenames)
                 ),
                 "".join(map(lambda s: f"SRC += {s}\n", self.conf.c_src)),
-                "CFLAGS += -L. \n",
-                "".join(map(lambda l: f"LIBS += {l}\n", self.conf.lib)),
+                "LDFLAGS += -L. \n",
+                "".join(map(lambda l: f"LDLIBS += -l{l}\n", self.conf.lib)),
                 # TODO add -.L "test_dir_shift"
             ]
             body_str = "\n".join(body)

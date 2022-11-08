@@ -9,7 +9,7 @@ from subprocess import run
 
 from .Conf import Conf
 from .Transpiler import Transpiler
-from .NalaTester import NalaTester
+from .CmockaTester import CmockaTester
 
 import os
 from rich import print
@@ -29,6 +29,8 @@ INIT_FINAL_MSG = "Configuration done. You can manually edit the config file if y
 TEST_BUILD_GENERATED = (
     "Test build directry generated at path [green]{conf.test_dirpath}[/green]."
 )
+NOTIFY_TEST_SRC_ADDED = "[green]{path}[/green] added to test sources."
+NOTIFY_C_SRC_ADDED = "[green]{path}[/green] added to c sources."
 DIVIDER = "[grey23]-------"
 INIT_WELCOME_MSG = "This utility will walk you through creating a [green]{conf.filename}[/green] file.\n"
 
@@ -44,7 +46,7 @@ ERR_TO_MSG = {
 CONFIG_FILENAME = "see-test.conf.yaml"
 
 conf = Conf(CONFIG_FILENAME)
-tester = NalaTester(conf)
+tester = CmockaTester(conf)
 transpile = Transpiler(conf)
 
 
@@ -101,8 +103,10 @@ def add_to_conf_smart_cli(files: List[str]) -> None:
         extension = Path(file).suffix
         if extension == ".c":
             data[Conf.DataKeys["c_src"]].append(file)
+            print(NOTIFY_C_SRC_ADDED.format(path=file))
         elif extension == ".st":
             data[Conf.DataKeys["test_src"]].append(file)
+            print(NOTIFY_TEST_SRC_ADDED.format(path=file))
         else:
             key = Prompt.ask(
                 f"Unknown extension for file [green]{file}[/green]. Where to add it ?",

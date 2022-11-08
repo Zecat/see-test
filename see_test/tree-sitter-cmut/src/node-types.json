@@ -304,45 +304,6 @@
     }
   },
   {
-    "type": "group",
-    "named": true,
-    "fields": {
-      "name": {
-        "multiple": false,
-        "required": true,
-        "types": [
-          {
-            "type": "group_name",
-            "named": true
-          }
-        ]
-      }
-    },
-    "children": {
-      "multiple": true,
-      "required": false,
-      "types": [
-        {
-          "type": "c_code",
-          "named": true
-        },
-        {
-          "type": "function_alias_definition",
-          "named": true
-        },
-        {
-          "type": "subgroup",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "group_name",
-    "named": true,
-    "fields": {}
-  },
-  {
     "type": "source_file",
     "named": true,
     "fields": {},
@@ -351,11 +312,11 @@
       "required": true,
       "types": [
         {
-          "type": "group",
+          "type": "includes",
           "named": true
         },
         {
-          "type": "includes",
+          "type": "subgroup",
           "named": true
         }
       ]
@@ -399,11 +360,6 @@
         }
       ]
     }
-  },
-  {
-    "type": "subgroup_name",
-    "named": true,
-    "fields": {}
   },
   {
     "type": "\"",
@@ -475,6 +431,10 @@
   },
   {
     "type": "number",
+    "named": true
+  },
+  {
+    "type": "subgroup_name",
     "named": true
   },
   {

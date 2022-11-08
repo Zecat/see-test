@@ -56,26 +56,16 @@ f("ABC")
 Array
 =====
 Anything here will be inserted at the beggining of the file
-===
-group name
-f: ft_split
 
 - subgroup name
 f([])
 
-====
-another group name
 
 
 - test
 
 
 f(2)
-
-<%
-
-
-%>
 
 f(["b" => "c", 1 => "e"])
 f(2, 3)

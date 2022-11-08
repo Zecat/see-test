@@ -65,7 +65,9 @@ class Conf:
         return Path(path).with_suffix("." + extension)
 
     def get_transpiled_filename(self, path) -> Path:
-        return Conf.replace_extension(Path(path).name, "c") # TODO Path(path) could be just path ?
+        return Conf.replace_extension(
+            Path(path).name, "c"
+        )  # TODO Path(path) could be just path ?
 
     def get_transpiled_path(self, path) -> Path:
         return self.test_dirpath / self.get_transpiled_filename(path)
