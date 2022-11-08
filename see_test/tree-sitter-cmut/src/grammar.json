@@ -5,8 +5,20 @@
       "type": "SEQ",
       "members": [
         {
-          "type": "SYMBOL",
-          "name": "includes"
+          "type": "REPEAT",
+          "content": {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "function_alias_definition"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "_c_code"
+              }
+            ]
+          }
         },
         {
           "type": "REPEAT",
@@ -16,10 +28,6 @@
           }
         }
       ]
-    },
-    "includes": {
-      "type": "PATTERN",
-      "value": "[^-]*"
     },
     "subgroup": {
       "type": "SEQ",
@@ -441,7 +449,7 @@
               },
               {
                 "type": "PATTERN",
-                "value": "[^*]*\\*+([^\\/*][^*]*\\*+)*"
+                "value": "[^*]*\\*+([^/*][^*]*\\*+)*"
               },
               {
                 "type": "STRING",
@@ -458,24 +466,11 @@
     },
     "multiline_c_code": {
       "type": "PATTERN",
-      "value": "[^%]*[^>]"
+      "value": ".*%>"
     },
     "_c_code": {
       "type": "CHOICE",
       "members": [
-        {
-          "type": "SEQ",
-          "members": [
-            {
-              "type": "PATTERN",
-              "value": "%[\\s]*"
-            },
-            {
-              "type": "SYMBOL",
-              "name": "c_code"
-            }
-          ]
-        },
         {
           "type": "SEQ",
           "members": [
@@ -491,10 +486,19 @@
               },
               "named": true,
               "value": "c_code"
+            }
+          ]
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "PATTERN",
+              "value": "%[\\s]*"
             },
             {
-              "type": "STRING",
-              "value": "%>"
+              "type": "SYMBOL",
+              "name": "c_code"
             }
           ]
         }

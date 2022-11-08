@@ -55,7 +55,8 @@ f("ABC")
 =====
 Array
 =====
-Anything here will be inserted at the beggining of the file
+
+<% Anything here will be inserted at the beggining of the file %>
 
 - subgroup name
 f([])

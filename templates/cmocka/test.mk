@@ -3,7 +3,7 @@ NAME = test.out
 SRC += $(TESTS)
 
 CC = gcc
-CFLAGS += -Wall -Wextra -Werror
+CFLAGS += -Wall -Wextra -Werror -I ~/.local/include
 LDLIBS += -lcmocka
 RM = rm
 OBJDIR = build

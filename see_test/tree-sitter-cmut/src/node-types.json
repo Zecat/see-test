@@ -309,10 +309,14 @@
     "fields": {},
     "children": {
       "multiple": true,
-      "required": true,
+      "required": false,
       "types": [
         {
-          "type": "includes",
+          "type": "c_code",
+          "named": true
+        },
+        {
+          "type": "function_alias_definition",
           "named": true
         },
         {
@@ -366,10 +370,6 @@
     "named": false
   },
   {
-    "type": "%>",
-    "named": false
-  },
-  {
     "type": "&",
     "named": false
   },
@@ -419,10 +419,6 @@
   },
   {
     "type": "identifier",
-    "named": true
-  },
-  {
-    "type": "includes",
     "named": true
   },
   {

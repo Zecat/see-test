@@ -242,7 +242,7 @@ class TestSubgroupTS:
         self, node, get_node_text, function_aliases={}, vars_counter=VarsCounter()
     ):  # TODO cleanup function_aliases & vars_counter
         self.get_node_text = get_node_text
-        self.function_aliases = function_aliases
+        self.function_aliases = copy.deepcopy(function_aliases)
         name_node, *child_nodes = node.children
         self.name = slugify(
             self.get_node_text(name_node), separator="_", max_length=100, lowercase=True
@@ -252,10 +252,10 @@ class TestSubgroupTS:
         is_not_implemented = self.name[0] == "@"
         # HERE
         if is_not_implemented:
+            self.body.append( 'skip();')
             #  self.body.append(
             #  f'printf("\033[1;33mIGNORED\033[m%s\\n", "{self.name[1:]}");'
             #  )
-            return
 
         for child_node in child_nodes:
             if child_node.type == "c_code":
@@ -336,11 +336,26 @@ class TestFile:
         # TODO split parser + root node generation in different function
         self.root_node = tree.root_node
         # print(self.root_node.sexp())
-        includes_node, *group_nodes = self.root_node.children
-        self.includes_str = self.get_node_text(includes_node)
-        self.groups = list(
-            map(lambda node: TestSubgroupTS(node, self.get_node_text), group_nodes)
-        )
+        nodes = self.root_node.children
+        #self.includes_str = self.get_node_text(includes_node)
+        self.groups = []
+        self.function_aliases = {}
+        self.header = []
+
+        for node in nodes:
+            if node.type == "c_code":
+                self.header.append(self.get_node_text(node))
+            if node.type == "subgroup":
+                self.groups.append(TestSubgroupTS(node, self.get_node_text, self.function_aliases))
+            elif node.type == 'function_alias_definition':
+                alias_name_node = node.child_by_field_name("alias_name")
+                function_name_node = node.child_by_field_name("function_name")
+                alias_name = self.get_node_text(alias_name_node)
+                function_name = self.get_node_text(function_name_node)
+                self.function_aliases[alias_name] = function_name
+                self.header.append(
+                    c.comment(f"Main scope alias: {alias_name} -> {function_name}")
+                )
 
         # self.body = [includes_str] + selfgroups
 
@@ -353,7 +368,7 @@ class TestFile:
 
     def __str__(self):
         return (
-            self.includes_str
+            '\n'.join(self.header) + '\n\n'
             + "\n\n".join(map(str, self.groups))
             + "\n\n"
             + self.cmocka_main_str()

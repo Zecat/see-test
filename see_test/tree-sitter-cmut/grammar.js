@@ -7,9 +7,9 @@ module.exports = grammar({
   ],
   
   rules: {
-    source_file: $ => seq($.includes, repeat($.subgroup)),
+    source_file: $ => seq( repeat(choice($.function_alias_definition, $._c_code)),repeat($.subgroup)),
 
-    includes: $ => /[^-]*/,
+    //    includes: $ => /[^-]*/,
 
     subgroup: $ => seq(
       $._subgroup_line,
@@ -115,11 +115,11 @@ module.exports = grammar({
 
     c_code: $ => /.*/,
 
-    multiline_c_code: $ => /[^%]*[^>]/,
+    multiline_c_code: $ => /.*%>/, //[^%]*[^>],
 
     _c_code: $ => choice(
+      seq(/<%\n?/, alias($.multiline_c_code, $.c_code)),// '%>'),
       seq(/%[\s]*/, $.c_code),
-      seq(/<%\n?/, alias($.multiline_c_code, $.c_code), '%>')
     )
 
   }
