@@ -243,18 +243,16 @@ class TestSubgroupTS:
         self.get_node_text = get_node_text
         self.function_aliases = copy.deepcopy(function_aliases)
         name_node, *child_nodes = node.children
+        self.name = self.get_node_text(name_node);
+        skip = self.name[0] == "@";
         self.name = slugify(
-            self.get_node_text(name_node), separator="_", max_length=100, lowercase=True
+            self.name, separator="_", max_length=100, lowercase=True
         )
         self.body = []
         # self.body.append(c.comment("---- " + self.name + " ----"))
-        is_not_implemented = self.name[0] == "@"
         # HERE
-        if is_not_implemented:
+        if skip:
             self.body.append( 'skip();')
-            #  self.body.append(
-            #  f'printf("\033[1;33mIGNORED\033[m%s\\n", "{self.name[1:]}");'
-            #  )
 
         for child_node in child_nodes:
             if child_node.type == "c_code":
@@ -277,10 +275,6 @@ class TestSubgroupTS:
                 self.body.append(
                     c.comment(f"Subgroup scope alias: {alias_name} -> {function_name}")
                 )
-
-        #  if not is_not_implemented:
-        # HERE
-        # self.body.append(f'printf("\033[33m%s: PASS\033[m\\n", "{self.name}");')
 
     def __str__(self):
         self.body.append("(void) state;")

@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <strings.h>
+ #include <sys/types.h>
+       #include <sys/stat.h>
+       #include <fcntl.h>
 
 #define BUFSIZE 65536
 
@@ -14,19 +17,19 @@
     fflush(stdout);                                 \
     stdout_save = dup(STDOUT_FILENO);               \
     bzero(stdout_buffer, BUFSIZE);                  \
-    freopen(NULL_DEVICE, "a", stdout);              \
-    setvbuf(stdout, stdout_buffer, _IOFBF, BUFSIZE);
+    freopen("stdout_tmp", "w", stdout);              
                                                     
 #define CAPTURE_STDOUT_STOP                         \
     freopen(NULL_DEVICE, "a", stdout);              \
     dup2(stdout_save, STDOUT_FILENO);               \
-    setvbuf(stdout, NULL, _IONBF, BUFSIZE);         
+    read(open("stdout_tmp", O_RDONLY, 0), stdout_buffer, BUFSIZE);
+
 
 #define ASSERT_STDOUT(expected) \
+    fseek(stdout , 0 , SEEK_SET); \
     CAPTURE_STDOUT_STOP \
     ASSERT_EQ(stdout_buffer, expected)
                                                    
 #define CAPTURE_INIT                                \
     int stdout_save;                                \
     char stdout_buffer[BUFSIZE];                    
-

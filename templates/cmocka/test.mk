@@ -1,11 +1,13 @@
 NAME = test.out
 
 SRC += $(TESTS)
-SRC += auto_assert.c 
+SRC += auto_assert.c CException.c
 
 CC = gcc
 CFLAGS += -Wall -Wextra -Werror -I ~/.local/include
 LDLIBS += -lcmocka# -ltap
+LDFLAGS += -L$(HOME)/.local/lib
+#export LD_LIBRARY_PATH=$(HOME)/.local/lib:$LD_LIBRARY_PATH
 #LDFLAGS += -L./tap
 RM = rm
 OBJDIR = build

@@ -29,6 +29,9 @@ class CmockaTester:
     def get_template_dir(self) -> Path:
         return (Path(__loader__.path) / "../../../templates/cmocka").resolve()
 
+    def get_cexception_dir(self) -> Path:
+        return (Path(__loader__.path) / "../../../templates/cmocka/cexception/lib").resolve()
+
     def init(self) -> None:
         test_dirpath = self.conf.test_dirpath
         if not test_dirpath.exists():
@@ -45,6 +48,14 @@ class CmockaTester:
         shutil.copy(
             self.get_template_dir() / "auto_assert.h",
             test_dirpath / "auto_assert.h",
+        )
+        shutil.copy(
+            self.get_cexception_dir() / 'CException.c',
+            test_dirpath / 'CException.c',
+        )
+        shutil.copy(
+            self.get_cexception_dir() / 'CException.h',
+            test_dirpath / 'CException.h',
         )
         self.update()
 
