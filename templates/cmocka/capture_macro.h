@@ -21,6 +21,10 @@
     freopen(NULL_DEVICE, "a", stdout);              \
     dup2(stdout_save, STDOUT_FILENO);               \
     setvbuf(stdout, NULL, _IONBF, BUFSIZE);         
+
+#define ASSERT_STDOUT(expected) \
+    CAPTURE_STDOUT_STOP \
+    ASSERT_EQ(stdout_buffer, expected)
                                                    
 #define CAPTURE_INIT                                \
     int stdout_save;                                \

@@ -175,18 +175,19 @@ class TestCallExpression:
         output_var = "output" + str(self.vars_block.var_counter.add_var("output"))
         errput_var = "input" + str(self.vars_block.var_counter.add_var("errput"))
         # HERE
-        ouput_assertion_str = self.get_eq_assertion_str(
-            "stdout_buffer", expect_output_text, "string"
-        )
+        #ouput_assertion_str = self.get_eq_assertion_str(
+        #    "stdout_buffer", expect_output_text, "string"
+        #"")
         # HERE
         # self.body.append(f"CAPTURE_OUTPUT({output_var}, {errput_var})" + " {")
-        # self.body.append("    "+fn_call_str)
-        self.body.append("CAPTURE_STDOUT_START")
+        self.body.append(f"CAPTURE_STDOUT_START")
         self.body.append(fn_call_str)
-        self.body.append("CAPTURE_STDOUT_STOP")
+        #self.body.append("CAPTURE_STDOUT_START")
+        self.body.append(c.fcall('ASSERT_STDOUT', [expect_output_text])+';')
+        #self.body.append("CAPTURE_STDOUT_STOP")
         # HERE
         # self.body.append("}\n\n" + ouput_assertion_str)
-        self.body.append(ouput_assertion_str)
+        #self.body.append(ouput_assertion_str)
 
     def add_call_expression_from_node(self, node):
         name_node = node.child_by_field_name("name")
@@ -209,24 +210,22 @@ class TestCallExpression:
 
         if expect_return_node:
             expect_return_text = self.get_node_text(expect_return_node)
-            fn_assertion_str = self.get_eq_assertion_str(
+            fcall_str = self.get_eq_assertion_str(
                 fcall_str, expect_return_text, expect_return_node.type
             )
-            fn_call_str = fn_assertion_str
-        else:
-            fn_call_str = fcall_str + ";"
+            
 
         if expect_output_text != None:
-            self.wrap_output_text(expect_output_text, fn_call_str)
+            self.wrap_output_text(expect_output_text, fcall_str)
         else:
-            self.body.append(fn_call_str)
+            self.body.append(fcall_str)
 
         self.body += expect_assertions
 
     # HERE
     def get_eq_assertion_str(self, a, b, node_type):
-        return node_type_to_cmocka_assert_fn[node_type](a, b)
-        # return str(c.fcall("ASSERT_EQ", [a, b]) + ";")
+        #return node_type_to_cmocka_assert_fn[node_type](a, b)
+        return str(c.fcall("ASSERT_EQ", [a, b]) + ";")
 
 
 def format_c_code_block(str):
@@ -414,6 +413,7 @@ def generate_cmut_file(path_in, path_out, path_shift=None):
 #include <cmocka.h>
 
 #include "capture_macro.h"
+#include "auto_assert.h"
 
 CAPTURE_INIT
 

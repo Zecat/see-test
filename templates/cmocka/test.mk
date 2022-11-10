@@ -1,10 +1,12 @@
 NAME = test.out
 
 SRC += $(TESTS)
+SRC += auto_assert.c 
 
 CC = gcc
 CFLAGS += -Wall -Wextra -Werror -I ~/.local/include
-LDLIBS += -lcmocka
+LDLIBS += -lcmocka# -ltap
+#LDFLAGS += -L./tap
 RM = rm
 OBJDIR = build
 
@@ -15,7 +17,7 @@ OBJ = $(addprefix $(OBJDIR)/, $(notdir $(SRC:.c=.o)))
 
 ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
-$(NAME): $(SRC) 
+$(NAME): $(SRC)
 	$(CC) $(CFLAGS) $(SRC) $(LDFLAGS) $(LDLIBS)  -o $@
 
 test: $(NAME)

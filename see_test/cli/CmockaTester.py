@@ -38,6 +38,14 @@ class CmockaTester:
             self.get_template_dir() / "capture_macro.h",
             test_dirpath / "capture_macro.h",
         )
+        shutil.copy(
+            self.get_template_dir() / "auto_assert.c",
+            test_dirpath / "auto_assert.c",
+        )
+        shutil.copy(
+            self.get_template_dir() / "auto_assert.h",
+            test_dirpath / "auto_assert.h",
+        )
         self.update()
 
     def update(self) -> None:

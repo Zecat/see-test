@@ -1,6 +1,7 @@
 NAME = test.out
 
 SRC += $(TESTS)
+ShRC += auto_assert.c
 
 CC = gcc
 CFLAGS += -Wall -Wextra -Werror -I ~/.local/include
@@ -17,11 +18,14 @@ OBJ = $(addprefix $(OBJDIR)/, $(notdir $(SRC:.c=.o)))
 
 ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
-$(NAME): $(SRC) 
+preload:
+	gcc override.c -o override.so -fPIC -shared -ldl
+
+$(NAME): $(SRC) preload 
 	$(CC) $(CFLAGS) $(SRC) $(LDFLAGS) $(LDLIBS) -o $@
 
 test: $(NAME)
-	$(ROOT_DIR)/$(NAME) & # The & prevents makefile from displaying "make *** error..." when the test fail
+	LD_PRELOAD="$(ROOT_DIR)/override.so" $(ROOT_DIR)/$(NAME) & # The & prevents makefile from displaying "make *** error..." when the test fail
 
 #%.o: %.c
 #	$(CC) $(CFLAGS) -c -o $@ $< -L./libft -lft 
