@@ -19,7 +19,11 @@
                                                     
 #define CAPTURE_STDOUT_STOP                         \
     fflush(stdout); \
-    read(open("stdout_tmp", O_RDONLY, 0), stdout_buffer, BUFSIZE);
+    fd = open("stdout_tmp", O_RDONLY, 0); \
+    read(fd, stdout_buffer, BUFSIZE); \
+    RESTORE_STDOUT \
+    CATCH_STDOUT
+    /* HACK, TODO to this a better way */
 
 #define CATCH_STDOUT  \
     fflush(stdout);                                 \
@@ -28,7 +32,7 @@
 
 #define RESTORE_STDOUT  \
     freopen(NULL_DEVICE, "a", stdout);              \
-    dup2(pfd, STDOUT_FILENO);               \
+    dup2(pfd, STDOUT_FILENO);               
 
 #define ASSERT_STDOUT(expected) \
     CAPTURE_STDOUT_STOP \
@@ -36,6 +40,7 @@
                                                    
 #define CAPTURE_INIT                                \
     int pfd;                                \
+    int fd; \
     char stdout_buffer[BUFSIZE];                    
 
 
