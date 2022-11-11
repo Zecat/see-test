@@ -213,6 +213,8 @@ class TestCallExpression:
             fcall_str = self.get_eq_assertion_str(
                 fcall_str, expect_return_text, expect_return_node.type
             )
+        else :
+            fcall_str += ';'
             
 
         if expect_output_text != None:
@@ -238,21 +240,29 @@ def format_c_code_block(str):
 
 class TestSubgroupTS:
     def __init__(
-        self, node, get_node_text, function_aliases={}, vars_counter=VarsCounter()
+        self, node, get_node_text, function_aliases={}, vars_counter=VarsCounter(), prefix = ''
     ):  # TODO cleanup function_aliases & vars_counter
         self.get_node_text = get_node_text
         self.function_aliases = copy.deepcopy(function_aliases)
         name_node, *child_nodes = node.children
-        self.name = self.get_node_text(name_node);
-        skip = self.name[0] == "@";
-        self.name = slugify(
-            self.name, separator="_", max_length=100, lowercase=True
-        )
+        name = self.get_node_text(name_node);
         self.body = []
-        # self.body.append(c.comment("---- " + self.name + " ----"))
+        self.body.append(c.comment("---- " + name + " ----"))
+
+        skip = name[0] == "@";
+        # TODO handle this in the grammar
+        if skip:
+            name = name[1:]
+        self.prefix = prefix
+        self.name = slugify(
+            name, separator="_", max_length=100, lowercase=True
+        )
+        self.fn_name = prefix + self.name
+        self.body.append(f'TEST_START("{name}")')
         # HERE
         if skip:
-            self.body.append( 'skip();')
+            self.body.append( 'SKIP')
+
 
         for child_node in child_nodes:
             if child_node.type == "c_code":
@@ -260,7 +270,9 @@ class TestSubgroupTS:
                 c_code_block = format_c_code_block(c_code_block)
                 self.body.append(c_code_block)
             elif child_node.type == "call_expression":
-                self.body.append(c.comment(self.get_node_text(child_node)))
+                #self.body.append(c.comment())
+                info = self.get_node_text(child_node).replace('"','\\"');
+                self.body.append(f"INFO(\"{info}\")")
                 self.body.append(
                     TestCallExpression(
                         child_node, vars_counter, self.get_node_text, function_aliases
@@ -276,10 +288,11 @@ class TestSubgroupTS:
                     c.comment(f"Subgroup scope alias: {alias_name} -> {function_name}")
                 )
 
+        self.body.append('TEST_END')
+
     def __str__(self):
-        self.body.append("(void) state;")
         return c.fdef(
-            f"static void {self.name}(void **state)", "\n\n".join(map(str, self.body))
+            f"static test_state_t* {self.fn_name}()", "\n\n".join(map(str, self.body))
         )
 
 
@@ -323,7 +336,7 @@ class TestSubgroupTS:
 
 
 class TestFile:
-    def __init__(self, source_code_bytes):
+    def __init__(self, source_code_bytes, path):
         self.src = source_code_bytes
         tree = parser.parse(self.read_callable)
         # TODO split parser + root node generation in different function
@@ -334,12 +347,17 @@ class TestFile:
         self.groups = []
         self.function_aliases = {}
         self.header = []
+        # TODO factorize slugify function which is used many time with the name params
+        self.name = slugify(
+            path, separator="_", max_length=100, lowercase=True
+        )
+        i = 0
 
         for node in nodes:
             if node.type == "c_code":
                 self.header.append(self.get_node_text(node))
             if node.type == "subgroup":
-                self.groups.append(TestSubgroupTS(node, self.get_node_text, self.function_aliases))
+                self.groups.append(TestSubgroupTS(node, self.get_node_text, self.function_aliases, prefix = f"{self.name}_{i}_"))
             elif node.type == 'function_alias_definition':
                 alias_name_node = node.child_by_field_name("alias_name")
                 function_name_node = node.child_by_field_name("function_name")
@@ -349,6 +367,7 @@ class TestFile:
                 self.header.append(
                     c.comment(f"Main scope alias: {alias_name} -> {function_name}")
                 )
+            i = i+1
 
         # self.body = [includes_str] + selfgroups
 
@@ -364,23 +383,35 @@ class TestFile:
             '\n'.join(self.header) + '\n\n'
             + "\n\n".join(map(str, self.groups))
             + "\n\n"
-            + self.cmocka_main_str()
+            + self.main_str()
         )  # = "\n".join(map(str, self.body))
 
-    def cmocka_main_str(self):
+    def main_str(self):
         return (
             """int main(void) {
-    const struct CMUnitTest tests[] = {
         """
-            + "\n        ".join(self.get_cmocka_unit_tests())
+            + "test_fn_t fns[] = {" + ",\n".join(self.get_test_fn()) + "\n, NULL\n};"
             + """
-    };
-    return cmocka_run_group_tests(tests, NULL, NULL);
+            execute_tests(fns);
 }"""
         )
 
-    def get_cmocka_unit_tests(self):
-        return map(lambda group: f"cmocka_unit_test({group.name}),", self.groups)
+    def get_test_fn(self):
+        return map(lambda group: group.fn_name, self.groups)
+#    def cmocka_main_str(self):
+#        return (
+#            """int main(void) {
+#    const struct CMUnitTest tests[] = {
+#        """
+#            + "\n        ".join(self.get_cmocka_unit_tests())
+#            + """
+#    };
+#    return cmocka_run_group_tests(tests, NULL, NULL);
+#}"""
+#        )
+#
+#    def get_cmocka_unit_tests(self):
+#        return map(lambda group: f"cmocka_unit_test({group.name}),", self.groups)
 
 
 def transpile_cmut_file(path):
@@ -388,7 +419,7 @@ def transpile_cmut_file(path):
     with open(path, "rb") as in_file:
         source_code_bytes = in_file.read()
         in_file.close()
-        cmut_str = str(TestFile(source_code_bytes))
+        cmut_str = str(TestFile(source_code_bytes, path.stem))
     return cmut_str
 
 
@@ -405,7 +436,10 @@ def generate_cmut_file(path_in, path_out, path_shift=None):
 #include <stddef.h>
 #include <setjmp.h>
 #include <cmocka.h>
+#include <string.h>
+#include <stdlib.h>
 
+char *test_name;
 #include "capture_macro.h"
 #include "auto_assert.h"
 

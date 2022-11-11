@@ -2,55 +2,97 @@
 #include <stddef.h>
 #include <setjmp.h>
 #include <cmocka.h>
+#include <string.h>
+#include <stdlib.h>
 
+char *test_name;
 #include "capture_macro.h"
+#include "auto_assert.h"
 
 CAPTURE_INIT
 
 #include "../add.h"
 
-static void subgroup_a(void **state) {
-    /* add(1, 2) => 3 >> "abc" */
+static test_state_t* test_1_test_b() {
+    /* ---- test b ---- */
+
+    TEST_START("test b")
+
+    INFO("add(1, 2) => 3 >> \"yoyt\"")
 
     CAPTURE_STDOUT_START
 
-    assert_int_equal(add(1, 2), 3);
+    ASSERT_EQ(add(1, 2), 3);
 
-    CAPTURE_STDOUT_STOP
+    ASSERT_STDOUT("yoyt");
 
-    assert_string_equal(stdout_buffer, "abc");
-
-    /* add(1, 2) => 3 >> "a" */
+    INFO("add(1, 2) => 2 >> \"yayo\"")
 
     CAPTURE_STDOUT_START
 
-    assert_int_equal(add(1, 2), 3);
+    ASSERT_EQ(add(1, 2), 2);
 
-    CAPTURE_STDOUT_STOP
+    ASSERT_STDOUT("yayo");
 
-    assert_string_equal(stdout_buffer, "a");
-
-    (void) state;
+    TEST_END
 }
 
-static void subgroup_b(void **state) {
-    /* add(1, 2) => 3 >> "abc" */
+static test_state_t* test_2_kjds() {
+    /* ---- @ kjds ---- */
+
+    TEST_START(" kjds")
+
+    SKIP
+
+    INFO("add(1, 2) => 3 >> \"yayeeee\"")
 
     CAPTURE_STDOUT_START
 
-    assert_int_equal(add(1, 2), 3);
+    ASSERT_EQ(add(1, 2), 3);
 
-    CAPTURE_STDOUT_STOP
+    ASSERT_STDOUT("yayeeee");
 
-    assert_string_equal(stdout_buffer, "abc");
+    TEST_END
+}
 
-    (void) state;
+static test_state_t* test_3_ab() {
+    /* ---- ab ---- */
+
+    TEST_START("ab")
+
+    INFO("add(1,3) => 4 >> \"yoyo\"")
+
+    CAPTURE_STDOUT_START
+
+    ASSERT_EQ(add(1, 3), 4);
+
+    ASSERT_STDOUT("yoyo");
+
+    TEST_END
+}
+
+static test_state_t* test_4_abc() {
+    /* ---- abc ---- */
+
+    TEST_START("abc")
+
+    INFO("add(1,3) => 4 >> \"yoyo\"")
+
+    CAPTURE_STDOUT_START
+
+    ASSERT_EQ(add(1, 3), 4);
+
+    ASSERT_STDOUT("yoyo");
+
+    TEST_END
 }
 
 int main(void) {
-    const struct CMUnitTest tests[] = {
-        cmocka_unit_test(subgroup_a),
-        cmocka_unit_test(subgroup_b),
-    };
-    return cmocka_run_group_tests(tests, NULL, NULL);
+        test_fn_t fns[] = {test_1_test_b,
+test_2_kjds,
+test_3_ab,
+test_4_abc
+, NULL
+};
+            execute_tests(fns);
 }

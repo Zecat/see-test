@@ -49,14 +49,6 @@ class CmockaTester:
             self.get_template_dir() / "auto_assert.h",
             test_dirpath / "auto_assert.h",
         )
-        shutil.copy(
-            self.get_cexception_dir() / 'CException.c',
-            test_dirpath / 'CException.c',
-        )
-        shutil.copy(
-            self.get_cexception_dir() / 'CException.h',
-            test_dirpath / 'CException.h',
-        )
         self.update()
 
     def update(self) -> None:

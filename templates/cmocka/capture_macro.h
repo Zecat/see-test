@@ -15,21 +15,27 @@
 
 #define CAPTURE_STDOUT_START                        \
     fflush(stdout);                                 \
-    stdout_save = dup(STDOUT_FILENO);               \
-    bzero(stdout_buffer, BUFSIZE);                  \
-    freopen("stdout_tmp", "w", stdout);              
+    bzero(stdout_buffer, BUFSIZE);                  
                                                     
 #define CAPTURE_STDOUT_STOP                         \
-    freopen(NULL_DEVICE, "a", stdout);              \
-    dup2(stdout_save, STDOUT_FILENO);               \
+    fflush(stdout); \
     read(open("stdout_tmp", O_RDONLY, 0), stdout_buffer, BUFSIZE);
 
+#define CATCH_STDOUT  \
+    fflush(stdout);                                 \
+    pfd = dup(STDOUT_FILENO);               \
+    freopen("stdout_tmp", "w", stdout);              
+
+#define RESTORE_STDOUT  \
+    freopen(NULL_DEVICE, "a", stdout);              \
+    dup2(pfd, STDOUT_FILENO);               \
 
 #define ASSERT_STDOUT(expected) \
-    fseek(stdout , 0 , SEEK_SET); \
     CAPTURE_STDOUT_STOP \
     ASSERT_EQ(stdout_buffer, expected)
                                                    
 #define CAPTURE_INIT                                \
-    int stdout_save;                                \
+    int pfd;                                \
     char stdout_buffer[BUFSIZE];                    
+
+
