@@ -17,7 +17,7 @@ char details[4096];
 
  char * diff_details_int(int actual, int expected)
  {
-    sprintf(details, "%i != %i", actual, expected);
+    sprintf(details, "       %i != %i", actual, expected);
     return strdup(details);
  }
 char * diff_details_string(char *actual, char *expected)
@@ -29,7 +29,7 @@ char * diff_details_string(char *actual, char *expected)
 
 char * diff_details_char(char actual, char expected)
 {
-    sprintf(details, "'%c' != '%c'", actual, expected);
+    sprintf(details, "       '%c' != '%c'", actual, expected);
     return strdup(details);
 }
 
