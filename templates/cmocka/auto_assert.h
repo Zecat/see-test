@@ -19,6 +19,9 @@ typedef struct {
   char *name;
   char *file;
   int line;
+  int st_charet;
+  int st_line;
+  char *st_filepath;
 } test_state_t;
 
 typedef test_state_t* (*test_fn_t)(void);
@@ -72,6 +75,7 @@ int do_assert_string(const void *actual_p, const void *expected_p);
 //void print_str_diff(const char *input, const char *ref, char *format_diff);
 //void print_test_ok(void);
 //void print_test_result(void);
+int compare_long_int(long int a, long int b);
 
 void print_test_ok(char *test_name);
 void print_test_ko(test_state_t *test);
@@ -96,14 +100,19 @@ void print_test_skipped(test_state_t *state);
     RESTORE_STDOUT \
     return state;
 
-#define INFO(info_str) \
-    strcpy(state->info, info_str);
+// TODO create function instead of macro
+#define INFO(extract, file_path, line, charet) \
+    strcpy(state->info, extract); \
+    state->st_filepath = strdup(file_path); \
+    state->st_line = line; \
+    state->st_charet = charet;
+    
 /**
  * Assert that given characters, numbers, pointers or strings are
  * equal.
  */
 #define ASSERT_EQ(is, shouldbe)                                     \
-  if(!DO_ASSERT_FUNC(is)((is),(shouldbe))) { \
+  if(COMPARE(is)(is, shouldbe)) { \
     state->details = GET_ERROR_FN(is)(is, shouldbe); \
     state->ko = 1; \
     state->file = __FILE__; \
@@ -111,6 +120,7 @@ void print_test_skipped(test_state_t *state);
     RESTORE_STDOUT \
     return state; \
   }
+// TODO rename is and shouldbe
 
 
 #define GET_ERROR_FN(value)                         \
@@ -137,26 +147,11 @@ void print_test_skipped(test_state_t *state);
              bool: diff_details_bool,                    \
              default: diff_details_ptr*/
 
-#define DO_ASSERT_FUNC(value)                         \
-    _Generic((value),                                   \
-             char: do_assert_char,                    \
-             signed char: do_assert_schar,            \
-             unsigned char: do_assert_uchar,          \
-             short: do_assert_short,                  \
-             unsigned short: do_assert_ushort,        \
-             int: do_assert_int,                      \
-             unsigned int: do_assert_uint,            \
-             long: do_assert_long,                    \
-             unsigned long: do_assert_ulong,          \
-             long long: do_assert_llong,              \
-             unsigned long long: do_assert_ullong,    \
-             float: do_assert_float,                  \
-             double: do_assert_double,                \
-             long double: do_assert_ldouble,          \
-             char *: do_assert_string,                \
-             const char *: do_assert_string,          \
-             bool: do_assert_bool,                    \
-             default: do_assert_ptr)
+#define COMPARE(a)                         \
+    _Generic((a),                                   \
+             char *: strcmp,                \
+             const char *: strcmp,          \
+             default: compare_long_int)
 
 /*
 #define NALA_ASSERT_ARRAY_FUNC(value)                                   \

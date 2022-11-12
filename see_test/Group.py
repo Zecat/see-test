@@ -6,6 +6,7 @@ from collections import defaultdict
 from pathlib import Path
 import re
 from .CCode import CCode
+import os
 
 see_test_lib_path = Path(__loader__.path).resolve().parents[0]
 ts_st_path = see_test_lib_path / "tree-sitter-cmut"
@@ -82,7 +83,7 @@ class VarsBlock:
 
 
 class TestCallExpression:
-    def __init__(self, node, vars_counter, get_node_text, function_aliases):
+    def __init__(self, node, vars_counter, get_node_text, path, function_aliases):
         self.function_aliases = function_aliases
         self.get_node_text = get_node_text
         self.vars_block = VarsBlock(vars_counter)
@@ -97,6 +98,7 @@ class TestCallExpression:
             "varname": self.to_varname,
             "ERROR": self.to_error,
         }
+        self.path = path
         self.add_call_expression_from_node(node)
 
     def __str__(self):
@@ -206,7 +208,14 @@ class TestCallExpression:
             expect_assertions += arg_expect_assertions
             arg_names.append(f"{arg_def[0]}")
 
-        fcall_str = c.fcall(self.function_aliases.get(fn_name, fn_name), arg_names)
+        real_fn_name = self.function_aliases.get(fn_name, fn_name) 
+        fcall_str = c.fcall(real_fn_name, arg_names)
+
+        extract = self.get_node_text(node).replace('"','\\"') # TODO resolve values when possible
+        # replace the alias name with the real fn name 
+        re.sub(r".+\(", real_fn_name + '(', extract, count=1)
+        line, charet = arg_node.start_point
+        self.body.append(f'INFO("{extract}", "{os.path.relpath(self.path)}", {line}, {charet})')
 
         if expect_return_node:
             expect_return_text = self.get_node_text(expect_return_node)
@@ -240,7 +249,7 @@ def format_c_code_block(str):
 
 class TestSubgroupTS:
     def __init__(
-        self, node, get_node_text, function_aliases={}, vars_counter=VarsCounter(), prefix = ''
+        self, node, get_node_text, path, function_aliases={}, vars_counter=VarsCounter(), prefix = ''
     ):  # TODO cleanup function_aliases & vars_counter
         self.get_node_text = get_node_text
         self.function_aliases = copy.deepcopy(function_aliases)
@@ -271,11 +280,9 @@ class TestSubgroupTS:
                 self.body.append(c_code_block)
             elif child_node.type == "call_expression":
                 #self.body.append(c.comment())
-                info = self.get_node_text(child_node).replace('"','\\"');
-                self.body.append(f"INFO(\"{info}\")")
                 self.body.append(
                     TestCallExpression(
-                        child_node, vars_counter, self.get_node_text, function_aliases
+                        child_node, vars_counter, self.get_node_text, path, function_aliases
                     )
                 )
             elif child_node.type == "function_alias_definition":
@@ -349,7 +356,7 @@ class TestFile:
         self.header = []
         # TODO factorize slugify function which is used many time with the name params
         self.name = slugify(
-            path, separator="_", max_length=100, lowercase=True
+            path.stem, separator="_", max_length=100, lowercase=True
         )
         i = 0
 
@@ -357,7 +364,7 @@ class TestFile:
             if node.type == "c_code":
                 self.header.append(self.get_node_text(node))
             if node.type == "subgroup":
-                self.groups.append(TestSubgroupTS(node, self.get_node_text, self.function_aliases, prefix = f"{self.name}_{i}_"))
+                self.groups.append(TestSubgroupTS(node, self.get_node_text, path, self.function_aliases, prefix = f"{self.name}_{i}_"))
             elif node.type == 'function_alias_definition':
                 alias_name_node = node.child_by_field_name("alias_name")
                 function_name_node = node.child_by_field_name("function_name")
@@ -419,7 +426,7 @@ def transpile_cmut_file(path):
     with open(path, "rb") as in_file:
         source_code_bytes = in_file.read()
         in_file.close()
-        cmut_str = str(TestFile(source_code_bytes, path.stem))
+        cmut_str = str(TestFile(source_code_bytes, path))
     return cmut_str
 
 

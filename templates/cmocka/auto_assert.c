@@ -17,7 +17,7 @@ char details[4096];
 
  char * diff_details_int(int actual, int expected)
  {
-    sprintf(details, "%i != %i", actual, expected);
+    sprintf(details, "       %i != %i", actual, expected);
     return strdup(details);
  }
 char * diff_details_string(char *actual, char *expected)
@@ -29,7 +29,7 @@ char * diff_details_string(char *actual, char *expected)
 
 char * diff_details_char(char actual, char expected)
 {
-    sprintf(details, "'%c' != '%c'", actual, expected);
+    sprintf(details, "       '%c' != '%c'", actual, expected);
     return strdup(details);
 }
 
@@ -111,102 +111,106 @@ char * diff_details_char(char actual, char expected)
 //
 // }
 
+int compare_long_int(long int a, long int b) {
+  return a - b;
+}
+
 /******* */
-int do_assert_ptr(const void *actual_p, const void *expected_p)
-{
-  (void)actual_p;
-  (void)expected_p;
-    return 0;
+// int do_assert_ptr(const void *actual_p, const void *expected_p)
+// {
+  // (void)actual_p;
+  // (void)expected_p;
+    // return 0;
     //return actual == expected;
-}
-int do_assert_char(char actual, char expected)
-{
-    return actual == expected;
-}
-
-int do_assert_schar(signed char actual, signed char expected)
-{
-    return actual == expected;
-}
-
-int do_assert_uchar(unsigned char actual, unsigned char expected)
-{
-    return actual == expected;
-}
-
-int do_assert_short(short actual, short expected)
-{
-    return actual == expected;
-}
-
-int do_assert_ushort(unsigned short actual, unsigned short expected)
-{
-
-    return actual == expected;
-}
-
-int do_assert_int(int actual, int expected)
-{
-    //printf("---------------%i != %i", actual, expected);
-    //_assert_int_equal(actual, expected);
-    return actual == expected;
-}
-
-int do_assert_uint(unsigned int actual, unsigned int expected)
-{
-
-    return actual == expected;
-}
-
-int do_assert_long(long actual, long expected)
-{
-    return actual == expected;
-}
-
-int do_assert_ulong(unsigned long actual, unsigned long expected)
-{
-    return actual == expected;
-
-}
-
-int do_assert_llong(long long actual, long long expected)
-{
-    return actual == expected;
-
-}
-
-int do_assert_ullong(unsigned long long actual,
-                        unsigned long long expected)
-{
-
-    return actual == expected;
-
-}
-
-int do_assert_float(float actual, float expected)
-{
-
-    return actual == expected;
-
-}
-
-int do_assert_double(double actual, double expected)
-{
-    return actual == expected;
-
-}
-
-int do_assert_ldouble(long double actual, long double expected)
-{
-    return actual == expected;
-
-}
-
-int do_assert_bool(bool actual, bool expected)
-{
-    return actual == expected;
-
-}
+// }
+// int do_assert_char(char actual, char expected)
+// {
+    // return actual == expected;
+// }
+//
+// int do_assert_schar(signed char actual, signed char expected)
+// {
+    // return actual == expected;
+// }
+//
+// int do_assert_uchar(unsigned char actual, unsigned char expected)
+// {
+    // return actual == expected;
+// }
+//
+// int do_assert_short(short actual, short expected)
+// {
+    // return actual == expected;
+// }
+//
+// int do_assert_ushort(unsigned short actual, unsigned short expected)
+// {
+//
+    // return actual == expected;
+// }
+//
+// int do_assert_int(int actual, int expected)
+// {
+    // printf("---------------%i != %i", actual, expected);
+    // _assert_int_equal(actual, expected);
+    // return actual == expected;
+// }
+//
+// int do_assert_uint(unsigned int actual, unsigned int expected)
+// {
+//
+    // return actual == expected;
+// }
+//
+// int do_assert_long(long actual, long expected)
+// {
+    // return actual == expected;
+// }
+//
+// int do_assert_ulong(unsigned long actual, unsigned long expected)
+// {
+    // return actual == expected;
+//
+// }
+//
+// int do_assert_llong(long long actual, long long expected)
+// {
+    // return actual == expected;
+//
+// }
+//
+// int do_assert_ullong(unsigned long long actual,
+                        // unsigned long long expected)
+// {
+//
+    // return actual == expected;
+//
+// }
+//
+// int do_assert_float(float actual, float expected)
+// {
+//
+    // return actual == expected;
+//
+// }
+//
+// int do_assert_double(double actual, double expected)
+// {
+    // return actual == expected;
+//
+// }
+//
+// int do_assert_ldouble(long double actual, long double expected)
+// {
+    // return actual == expected;
+//
+// }
+//
+// int do_assert_bool(bool actual, bool expected)
+// {
+    // return actual == expected;
+//
+// }
 
 
 //error_t *do_assert(const char *actual_p, const char *expected_p) {
@@ -220,10 +224,10 @@ int do_assert_bool(bool actual, bool expected)
 //  state->type = STRING;
 //  return err;
 //}
-int do_assert_string(const void *actual_p, const void *expected_p)
-{
-  return !strcmp((const char*)actual_p, (const char *)expected_p);
-}
+// int do_assert_string(const void *actual_p, const void *expected_p)
+// {
+  // return !strcmp((const char*)actual_p, (const char *)expected_p);
+// }
 
 void execute_tests(test_fn_t *fn) {
     test_state_t *state;
@@ -253,8 +257,8 @@ void set_str_diff_details(const char *input, const char *ref) {
  int ref_len = strlen(ref);
  int input_len = strlen(input);
  char *cursor = details;
- strcpy(cursor, "       expect:   ");
- cursor+=17;
+ strcpy(cursor, "       expect: ");
+ cursor+=15;
  while (ref[i]) {
    if (i < input_len && input[i] == ref[i]) 
    {
@@ -274,8 +278,8 @@ void set_str_diff_details(const char *input, const char *ref) {
  }
  *cursor = '\n';
  cursor++;
- strcpy(cursor, "       actual:   ");
- cursor+=17;
+ strcpy(cursor, "       actual: ");
+ cursor+=15;
  i=0;
  while (input[i]) {
    if (i < ref_len && input[i] == ref[i])
@@ -324,7 +328,10 @@ void print_test_ok(char *test_name) {
 //// TODO rename test_ko
 void print_test_ko(test_state_t *state) {
  printf(" \033[31mK0\033[0m    \033[36m%-50s\033[0m\n", state->name);
-  printf("       \033[35m%s:%i\033[0m %s\n%s\n", state->file, state->line, state->info, state->details);
+
+  /*
+   * TODO add option bug to display printf("%s:%i", state->file, state->line); */
+  printf("       \033[35m%s:%i\033[0m %s\n%s\n", state->st_filepath, state->st_line, state->info, state->details);
 }
 void print_test_skipped(test_state_t *state) {
  printf(" \033[33mSKIP\033[0m \033[36m%-50s\033[0m", state->name);
