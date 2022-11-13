@@ -2,19 +2,16 @@
 
 
 - test b
-add(1, 2) => 3 >> "yoyt"
-add(1, 2) => 2 >> "yayo"
+add(1, 2) => 62 >> "yoyT" 
+add(1, 2) => 8 >> "b"
+add(1, 2) => 3
+add(1, 2)  >> "c"
+add(1, 2) => 8 >> "b"
 
--@ kjds
+-test c
+add(1, 1) => 2
+add(1, 1) => 2
 
-add(1, 2) => 3 >> "yayeeee"
-
-- ab
-
-add(1,3) => 4 >> "yoyo"
-- abc
-
-add(1,3) => 4 >> "yoyo"
-
-
-
+-@test c
+add(1, 1) => 2
+add(1, 1) => 2

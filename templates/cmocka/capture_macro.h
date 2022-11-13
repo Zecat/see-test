@@ -15,7 +15,7 @@
 
 #define CAPTURE_STDOUT_START                        \
     fflush(stdout);                                 \
-    bzero(stdout_buffer, BUFSIZE);                  
+    bzero(stdout_buffer, BUFSIZE); 
                                                     
 #define CAPTURE_STDOUT_STOP                         \
     fflush(stdout); \
@@ -34,9 +34,9 @@
     freopen(NULL_DEVICE, "a", stdout);              \
     dup2(pfd, STDOUT_FILENO);               
 
-#define ASSERT_STDOUT(expected) \
+#define ASSERT_STDOUT(expected, __ST_TEST_STR__, __ST_FILE_PATH__, __ST_LINE__,__ST_CHARET__)                                     \
     CAPTURE_STDOUT_STOP \
-    ASSERT_EQ(stdout_buffer, expected)
+    ASSERT_EQ(stdout_buffer, expected, __ST_TEST_STR__, __ST_FILE_PATH__, __ST_LINE__,__ST_CHARET__)
                                                    
 #define CAPTURE_INIT                                \
     int pfd;                                \

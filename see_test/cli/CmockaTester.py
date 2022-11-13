@@ -42,6 +42,14 @@ class CmockaTester:
             test_dirpath / "capture_macro.h",
         )
         shutil.copy(
+            self.get_template_dir() / "assertion.c",
+            test_dirpath / "assertion.c",
+        )
+        shutil.copy(
+            self.get_template_dir() / "assertion.h",
+            test_dirpath / "assertion.h",
+        )
+        shutil.copy(
             self.get_template_dir() / "auto_assert.c",
             test_dirpath / "auto_assert.c",
         )

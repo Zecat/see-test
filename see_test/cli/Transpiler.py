@@ -10,6 +10,7 @@ from .Conf import Conf
 
 class TranspileHandler(watchdog.events.PatternMatchingEventHandler):
     def __init__(self, test_src, on_modified):
+        print(test_src)
         watchdog.events.PatternMatchingEventHandler.__init__(self, patterns=test_src)
         self.on_modified = on_modified
 
@@ -46,11 +47,11 @@ class Transpiler:
 
     def live_reload_thread(self) -> None:
         def on_modified(event):
-            self.transpile(event.src_path)
+            self.transpile(Path(event.src_path))
 
-        event_handler = TranspileHandler(self.conf.test_src, on_modified)
+        event_handler = TranspileHandler(list(map(str, self.conf.test_src)), on_modified)
         observer = watchdog.observers.Observer()
-        observer.schedule(event_handler, path=self.conf.path)
+        observer.schedule(event_handler, path=str(self.conf.root))
         observer.start()
         try:
             while True:

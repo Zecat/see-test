@@ -131,6 +131,7 @@ class TestCallExpression:
         return [(self.get_node_text(node), var_conf["name"], var_conf)]
 
     def to_array(self, node):
+        # TODO simplify this hell
         items = map(self.stack, node.named_children)
         # [[1], [2, 3], [4, 5, 6]] => [(1, []), (2, [3]), (4, [5, 6])]
         items = [(item[0], item[1:]) for item in items]
@@ -176,20 +177,16 @@ class TestCallExpression:
     def wrap_output_text(self, expect_output_text, fn_call_str):
         output_var = "output" + str(self.vars_block.var_counter.add_var("output"))
         errput_var = "input" + str(self.vars_block.var_counter.add_var("errput"))
-        # HERE
-        #ouput_assertion_str = self.get_eq_assertion_str(
-        #    "stdout_buffer", expect_output_text, "string"
-        #"")
-        # HERE
-        # self.body.append(f"CAPTURE_OUTPUT({output_var}, {errput_var})" + " {")
         self.body.append(f"CAPTURE_STDOUT_START")
         self.body.append(fn_call_str)
-        #self.body.append("CAPTURE_STDOUT_START")
-        self.body.append(c.fcall('ASSERT_STDOUT', [expect_output_text])+';')
-        #self.body.append("CAPTURE_STDOUT_STOP")
-        # HERE
-        # self.body.append("}\n\n" + ouput_assertion_str)
-        #self.body.append(ouput_assertion_str)
+        test_str = self.test_str
+        # TODO avoid this hack
+        test_str = re.sub(r'\s?=> \\".*\\"','',self.test_str)
+        test_str = re.sub(r'\s?=> [\d]+','',test_str)
+        # TODO avoid this parameter hell
+        self.body.append(c.fcall('ASSERT_STDOUT', [expect_output_text, test_str, self.relpath, self.line, self.charet])+';')
+        #  self.body.append('CAPTURE_STDOUT_STOP')
+        #  self.body.append(c.fcall('ASSERT_EQL', [expect_output_text, 'stdout_buffer', self.test_str, self.relpath, self.line, self.charet])+';')
 
     def add_call_expression_from_node(self, node):
         name_node = node.child_by_field_name("name")
@@ -211,11 +208,14 @@ class TestCallExpression:
         real_fn_name = self.function_aliases.get(fn_name, fn_name) 
         fcall_str = c.fcall(real_fn_name, arg_names)
 
-        extract = self.get_node_text(node).replace('"','\\"') # TODO resolve values when possible
+        test_str = self.get_node_text(node).replace('"','\\"') # TODO resolve values when possible
         # replace the alias name with the real fn name 
-        re.sub(r".+\(", real_fn_name + '(', extract, count=1)
+        re.sub(r".+\(", real_fn_name + '(', test_str, count=1)
         line, charet = arg_node.start_point
-        self.body.append(f'INFO("{extract}", "{os.path.relpath(self.path)}", {line}, {charet})')
+        self.test_str='"'+test_str+'"'
+        self.relpath = '"'+os.path.relpath(self.path)+'"'
+        self.line = line;
+        self.charet = charet;
 
         if expect_return_node:
             expect_return_text = self.get_node_text(expect_return_node)
@@ -233,10 +233,12 @@ class TestCallExpression:
 
         self.body += expect_assertions
 
-    # HERE
     def get_eq_assertion_str(self, a, b, node_type):
-        #return node_type_to_cmocka_assert_fn[node_type](a, b)
-        return str(c.fcall("ASSERT_EQ", [a, b]) + ";")
+        # TODO This is a hack, find a better way to do it
+        test_str = self.test_str
+        test_str = re.sub(r'>> \\".*\\"','',self.test_str)
+        # TODO avoid this parameter hell
+        return str(c.fcall("ASSERT_EQ", [a, b, test_str, self.relpath, self.line, self.charet]) + ";")
 
 
 def format_c_code_block(str):
@@ -250,7 +252,7 @@ def format_c_code_block(str):
 class TestSubgroupTS:
     def __init__(
         self, node, get_node_text, path, function_aliases={}, vars_counter=VarsCounter(), prefix = ''
-    ):  # TODO cleanup function_aliases & vars_counter
+    ):  
         self.get_node_text = get_node_text
         self.function_aliases = copy.deepcopy(function_aliases)
         name_node, *child_nodes = node.children
@@ -268,7 +270,6 @@ class TestSubgroupTS:
         )
         self.fn_name = prefix + self.name
         self.body.append(f'TEST_START("{name}")')
-        # HERE
         if skip:
             self.body.append( 'SKIP')
 
@@ -279,7 +280,6 @@ class TestSubgroupTS:
                 c_code_block = format_c_code_block(c_code_block)
                 self.body.append(c_code_block)
             elif child_node.type == "call_expression":
-                #self.body.append(c.comment())
                 self.body.append(
                     TestCallExpression(
                         child_node, vars_counter, self.get_node_text, path, function_aliases
@@ -299,7 +299,7 @@ class TestSubgroupTS:
 
     def __str__(self):
         return c.fdef(
-            f"static test_state_t* {self.fn_name}()", "\n\n".join(map(str, self.body))
+            f"static test_list_t* {self.fn_name}()", "\n\n".join(map(str, self.body))
         )
 
 
@@ -446,7 +446,6 @@ def generate_cmut_file(path_in, path_out, path_shift=None):
 #include <string.h>
 #include <stdlib.h>
 
-char *test_name;
 #include "capture_macro.h"
 #include "auto_assert.h"
 

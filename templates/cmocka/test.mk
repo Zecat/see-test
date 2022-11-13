@@ -1,10 +1,10 @@
 NAME = test.out
 
 SRC += $(TESTS)
-SRC += auto_assert.c 
+SRC += auto_assert.c assertion.c
 
 CC = gcc
-CFLAGS += -Wall -Wextra -Werror -I ~/.local/include
+CFLAGS += -g -Wall -Wextra -Werror -I ~/.local/include
 LDLIBS += -lcmocka# -ltap
 LDFLAGS += -L$(HOME)/.local/lib
 #export LD_LIBRARY_PATH=$(HOME)/.local/lib:$LD_LIBRARY_PATH
@@ -28,6 +28,8 @@ test: $(NAME)
 #%.o: %.c
 #	$(CC) $(CFLAGS) -c -o $@ $< -L./libft -lft 
 
+auto:
+	ls $(SRC) | entr -c make test
 clean:
 	#$(RM) -rf $(OBJ)
 

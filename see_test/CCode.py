@@ -20,7 +20,7 @@ class CCode:
         return f"{name}({self.comma_list(args)})"
 
     def comma_list(self, items):
-        return ", ".join(items)
+        return ", ".join(map(str, items))
 
     def ident_paragraph(self, paragraph, identation):
         return identation + paragraph.replace("\n", "\n" + identation).replace(
