@@ -1,7 +1,7 @@
 NAME = test.out
 
 SRC += $(TESTS)
-SRC += auto_assert.c assertion.c
+SRC += main.c auto_assert.c assertion.c
 
 CC = gcc
 CFLAGS += -g -Wall -Wextra -Werror -I ~/.local/include

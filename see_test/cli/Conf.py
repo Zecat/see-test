@@ -56,6 +56,11 @@ class Conf:
     def get_path_relative_to_root(self, path: Union[Path, None]) -> Optional[Path]:
         return self.root / path if path else None
 
+    # TODO cleanup duplicate with _get_path_relative_to_testdir
+    # TODO use it in Group.py
+    def get_path_relative_to_testdir(self, path: Path) -> Path:
+        return os.path.relpath(path, self.test_dirpath);
+
     @property
     def expected_path(self) -> Path:
         return Path(".") / self.filename

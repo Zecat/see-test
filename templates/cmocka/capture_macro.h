@@ -1,3 +1,6 @@
+#ifndef CAPTURE_MACRO_H
+#define CAPTURE_MACRO_H
+
 #include <stdio.h>
 #include <unistd.h>
 #include <strings.h>
@@ -39,8 +42,13 @@
     ASSERT_EQ(stdout_buffer, expected, __ST_TEST_STR__, __ST_FILE_PATH__, __ST_LINE__,__ST_CHARET__)
                                                    
 #define CAPTURE_INIT                                \
-    int pfd;                                \
-    int fd; \
-    char stdout_buffer[BUFSIZE];                    
+     int pfd;                                \
+     int fd; \
+     char stdout_buffer[BUFSIZE];                    
 
+#define CAPTURE_INIT_EXTERN                                \
+     extern int pfd;                                \
+     extern int fd; \
+     extern char stdout_buffer[BUFSIZE];                    
 
+# endif

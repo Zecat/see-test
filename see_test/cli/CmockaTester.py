@@ -3,6 +3,7 @@ from subprocess import run
 from pathlib import Path
 from .Conf import Conf
 from typing import Optional
+from slugify import slugify
 
 WARN_AUTO_GENERATED_FILE = (
     "This is an auto generated file, any manual change could be lost."
@@ -60,6 +61,36 @@ class CmockaTester:
         self.update()
 
     def update(self) -> None:
+        header_path = self.conf.test_dirpath / "test_files.h"
+        mode = "w" if header_path.exists() else "x"
+        with open(header_path, mode) as header_file:
+            content = ['test_fn_list_t *test_file__'+slugify(str(src.stem)) + '(void);' for src in self.conf.test_src]
+            header_file.write('\n'.join(content)+'\n')
+
+        main_path = self.conf.test_dirpath / "main.c"
+        mode = "w" if main_path.exists() else "x"
+        with open(main_path, mode) as main_file:
+            # TODO cleanup
+            main_file.write(f"// {WARN_AUTO_GENERATED_FILE}\n\n")
+            #includes = ['#include "'+str(self.conf.get_path_relative_to_testdir(self.conf.get_transpiled_path(src)))+'"' for src in self.conf.test_src]
+            #includes_str = '\n'.join(includes)
+
+            test_execution = ["execute_tests(test_file__"+slugify(str(src.stem), separator="_", max_length=100, lowercase=True)+"());" for src in self.conf.test_src]
+            #test_execution = ["EXECUTE_TESTS(test_file__"+slugify(str(src.stem), separator="_", max_length=100, lowercase=True)+")" for src in self.conf.test_src]
+            test_execution_str = '\n'.join(test_execution)
+            # TODO add see-test includes
+            main_str = """#include "auto_assert.h" 
+#include "test_files.h"
+#include "capture_macro.h"
+
+CAPTURE_INIT
+
+int main(void) {
+  """+ test_execution_str + """
+}"""
+            main_file.write(main_str)
+
+
         makefile_path = self.conf.test_dirpath / "Makefile"
         mode = "w" if makefile_path.exists() else "x"
         with open(makefile_path, mode) as makefile_file:

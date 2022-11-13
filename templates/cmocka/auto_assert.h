@@ -8,8 +8,12 @@
 
 typedef test_list_t* (*test_fn_t)(void);
 
+typedef struct test_fn_list_s {
+  test_fn_t test_fn;
+  struct test_fn_list_s *next;
+} test_fn_list_t;
 
-void execute_tests(test_fn_t *fn);
+void execute_tests(test_fn_list_t *fn_list);
 
  char * diff_details_int(int actual, int expected);
 
@@ -21,6 +25,19 @@ void print_assertion_report(assertion_list_t *assertion);
 void print_test_ko(test_list_t *test);
 char *set_str_diff_details(const char *input, const char *ref);
 void print_test_skipped(test_list_t *test);
+test_fn_list_t *push_test_fn(test_fn_list_t *list, test_fn_t test_fn);
+// TODO remove ?
+test_fn_list_t *add_test_fn(test_fn_list_t *list, test_fn_t fn);
+test_fn_list_t *create_test_fn_list(int useless, ...);
+#define EXECUTE_TESTS(file_slug) \
+  execute_tests(file_slug());
+
+/*#define REGISTER_TEST_FILE(file_slug, ...) \
+  test_fn_list_t *test_file__##file_slug() { \
+    test_fn_list_t *tests_fn_list = create_test_fn_list(0,  __VA_ARGS__ , NULL); \
+    return tests_fn_list; \
+  }
+  */
 
 #define TEST_START(test_name) \
     test_list_t *test = add_test(NULL, strdup(test_name)); \

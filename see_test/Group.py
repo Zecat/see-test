@@ -258,7 +258,6 @@ class TestSubgroupTS:
         name_node, *child_nodes = node.children
         name = self.get_node_text(name_node);
         self.body = []
-        self.body.append(c.comment("---- " + name + " ----"))
 
         skip = name[0] == "@";
         # TODO handle this in the grammar
@@ -394,14 +393,35 @@ class TestFile:
         )  # = "\n".join(map(str, self.body))
 
     def main_str(self):
-        return (
-            """int main(void) {
-        """
-            + "test_fn_t fns[] = {" + ",\n".join(self.get_test_fn()) + "\n, NULL\n};"
-            + """
-            execute_tests(fns);
-}"""
-        )
+        test_fn_list = self.get_test_fn()
+        push_test_fn = [f'test_fn_list = push_test_fn(test_fn_list, {test_fn});' for test_fn in test_fn_list]
+        push_test_fn_str = '\n'.join(push_test_fn)
+
+        test_fn_str = 'test_fn_list_t *test_file__'+self.name+"""() {
+        test_fn_list_t *test_fn_list = NULL;
+        """+push_test_fn_str+"""
+    return test_fn_list;
+  }"""
+        return test_fn_str;
+        #  test_fn_list = ",\n".join(self.get_test_fn())
+#
+        #  test_fn_str = 'test_fn_list_t *test_file__'+self.name+"""() {
+#
+    #  test_fn_list_t *tests_fn_list = create_test_fn_list(0, """+test_fn_list+""", NULL);
+    #  return tests_fn_list;
+  #  }"""
+        #  return test_fn_str;
+
+        #return f'REGISTER_TEST_FILE({self.name}, {test_fn_list})'
+
+        #  return (
+            #  """int main(void) {
+        #  """
+            #  + "test_fn_t fns[] = {" + ",\n".join(self.get_test_fn()) + "\n, NULL\n};"
+            #  + """
+            #  execute_tests(fns);
+#  }"""
+        #  )
 
     def get_test_fn(self):
         return map(lambda group: group.fn_name, self.groups)
@@ -449,8 +469,7 @@ def generate_cmut_file(path_in, path_out, path_shift=None):
 #include "capture_macro.h"
 #include "auto_assert.h"
 
-CAPTURE_INIT
-
+CAPTURE_INIT_EXTERN
 """
     # TODO what's the best way to do it ?
     cmut_str = test_framework_includes + cmut_str
