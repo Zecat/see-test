@@ -158,7 +158,7 @@ void print_test_ko(test_list_t *test) {
 
 }
 void print_test_skipped(test_list_t *test) {
- printf(" "YELLOW(SKIP)"  "BLUE(%-50s), test->name);
+ printf(" "YELLOW(SKIP)" "BLUE(%-50s), test->name);
 }
 
 test_fn_list_t *push_test_fn(test_fn_list_t *list, test_fn_t test_fn) {
