@@ -33,7 +33,7 @@ class Conf:
     # TODO Document that test_dir and test_src are relative to the configuration file, when c_src and transpiled_src src are relative to test_dir
     def update_properties(self, data: Dict) -> None:
 
-        self.lib = data.get(Conf.DataKeys["lib"], None)
+        self.lib = data.get(Conf.DataKeys["lib"], [])
         self.test_dir = data.get(Conf.DataKeys["test_dir"], None)
 
         test_src_data = data.get(Conf.DataKeys["test_src"], [])
