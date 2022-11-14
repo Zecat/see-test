@@ -27,12 +27,6 @@ node_type_to_c_var_conf = {
     "char": {"c_type": "int", "name": "char"},
 }
 
-node_type_to_cmocka_assert_fn = {
-    "string": lambda a, b: str(c.fcall("assert_string_equal", [a, b]) + ";"),
-    "number": lambda a, b: str(c.fcall("assert_int_equal", [a, b]) + ";"),
-    "char": lambda a, b: str(c.fcall("assert_memory_equal", [a, b, 1]) + ";"),
-}
-
 node_type_to_c_var_conf.setdefault("ptr_count", 0)
 node_type_to_c_var_conf.setdefault("arr_dim", 0)
 
