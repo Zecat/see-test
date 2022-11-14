@@ -89,7 +89,8 @@ class TestCallExpression:
             "struct": self.to_struct,
             "number": self.to_primitive,
             "char": self.to_primitive,
-            "varname": self.to_varname,
+            "varname": self.to_value,
+            "null": self.to_value,
             "ERROR": self.to_error,
         }
         self.path = path
@@ -104,7 +105,7 @@ class TestCallExpression:
     def stack(self, node):
         return self.make[node.type](node)
 
-    def to_varname(self, node):
+    def to_value(self, node):
         value = self.get_node_text(node)
         return [((value), "", {})]
 
