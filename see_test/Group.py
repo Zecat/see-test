@@ -464,6 +464,7 @@ def generate_cmut_file(path_in, path_out, path_shift=None):
 #include "capture_macro.h"
 #include "auto_assert.h"
 
+INIT_EXCEPTION
 CAPTURE_INIT_EXTERN
 """
     # TODO what's the best way to do it ?

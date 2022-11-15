@@ -138,7 +138,11 @@ void print_test_ok(test_list_t *test) {
   }
 void print_assertion_ko(assertion_list_t *assertion) {
   /* TODO add option debug to display printf("%s:%i", assertion->file, assertion->line); */
-  printf("   "RED(KO)"  "BLUE(%-30s)" "MAGENTA(%s:%i)"\n%s\n\n", assertion->st_test_str, assertion->st_file_path, assertion->st_line, assertion->details );
+  // TODO clean code
+  if (assertion->segfault)
+    printf("   "RED(SEGFAULT)"  "BLUE(%-30s)" "MAGENTA(%s:%i)"\n%s\n\n", assertion->st_test_str, assertion->st_file_path, assertion->st_line, assertion->details );
+  else
+    printf("   "RED(KO)"  "BLUE(%-30s)" "MAGENTA(%s:%i)"\n%s\n\n", assertion->st_test_str, assertion->st_file_path, assertion->st_line, assertion->details );
 }
 void print_assertion_ok(assertion_list_t *assertion) {
   /* TODO add option debug to display printf("%s:%i", assertion->file, assertion->line); */

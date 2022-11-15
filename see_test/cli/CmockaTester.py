@@ -58,6 +58,10 @@ class CmockaTester:
             self.get_template_dir() / "auto_assert.h",
             test_dirpath / "auto_assert.h",
         )
+        shutil.copy(
+            self.get_template_dir() / "catch_segfault.h",
+            test_dirpath / "catch_segfault.h",
+        )
         self.update()
 
     def update(self) -> None:

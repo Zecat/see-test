@@ -5,6 +5,7 @@
 #include <inttypes.h>
 #include <stdint.h>
 #include "assertion.h"
+#include "catch_segfault.h"
 
 typedef test_list_t* (*test_fn_t)(void);
 
@@ -63,7 +64,13 @@ test_fn_list_t *create_test_fn_list(int useless, ...);
   assertion->st_file_path = strdup(__ST_FILE_PATH__); \
   assertion->st_line = __ST_LINE__; \
   assertion->st_charet = __ST_CHARET__; \
-  HANDLE_ASSERTION(actual)(actual, expected, assertion)
+  TRY { \
+    HANDLE_ASSERTION(actual)(actual, expected, assertion); \
+  } \
+  CATCH { \
+    assertion->ko = 1; \
+    assertion->segfault = 1; \
+  }
 // TODO option for test to stop when the first assertion fail
 
 void do_int(long int actual, long int expected, assertion_list_t *assertion);

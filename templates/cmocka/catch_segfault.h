@@ -3,9 +3,10 @@
 #include <setjmp.h>
 
 #define INIT_EXCEPTION \
-  jmp_buf restore_point; \
-  sig_t org_handler = NULL; \
-  void skip_segfault(int signal){ \
+  static jmp_buf restore_point; \
+  static sig_t org_handler = NULL; \
+  static void skip_segfault(int signal){ \
+    (void) signal; \
     longjmp(restore_point, SIGSEGV); \
   } 
 
