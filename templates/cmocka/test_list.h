@@ -1,7 +1,5 @@
-#ifndef ASSERTION_H
-#define ASSERTION_H
-
-#include <stdlib.h>
+#ifndef TEST_LIST_H
+#define TEST_LIST_H
 
 typedef struct assertion_list_s{
   struct assertion_list_s *next;

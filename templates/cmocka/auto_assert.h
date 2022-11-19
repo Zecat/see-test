@@ -4,32 +4,15 @@
 #include <stdbool.h>
 #include <inttypes.h>
 #include <stdint.h>
-#include "assertion.h"
+#include "test_list.h"
+#include "test_fn_list.h"
 #include "catch_segfault.h"
+#include "assert_handler.h"
 
-typedef test_list_t* (*test_fn_t)(void);
-
-typedef struct test_fn_list_s {
-  test_fn_t test_fn;
-  struct test_fn_list_s *next;
-} test_fn_list_t;
 
 void execute_tests(test_fn_list_t *fn_list);
 
- char * diff_details_int(int actual, int expected);
 
-char * diff_details_string(char *actual, char *expected);
-char * diff_details_char(char actual, char expected);
-
-void print_test_ok(test_list_t *test);
-void print_assertion_report(assertion_list_t *assertion);
-void print_test_ko(test_list_t *test);
-char *set_str_diff_details(const char *input, const char *ref);
-void print_test_skipped(test_list_t *test);
-test_fn_list_t *push_test_fn(test_fn_list_t *list, test_fn_t test_fn);
-// TODO remove ?
-test_fn_list_t *add_test_fn(test_fn_list_t *list, test_fn_t fn);
-test_fn_list_t *create_test_fn_list(int useless, ...);
 #define EXECUTE_TESTS(file_slug) \
   execute_tests(file_slug());
 
@@ -72,33 +55,4 @@ test_fn_list_t *create_test_fn_list(int useless, ...);
     assertion->segfault = 1; \
   }
 // TODO option for test to stop when the first assertion fail
-
-void do_int(long int actual, long int expected, assertion_list_t *assertion);
-void do_char(char actual, char expected, assertion_list_t *assertion);
-void do_string(char *actual, char* expected, assertion_list_t *assertion);
-
-#define HANDLE_ASSERTION(value)                         \
-    _Generic((value),                                   \
-             int: do_int,                      \
-             char: do_char,                    \
-             char *: do_string)
-// TODO do it for every type, think about default too
-             /*char: diff_details_char,                    \
-             signed char: diff_details_schar,            \
-             unsigned char: diff_details_uchar,          \
-             short: diff_details_short,                  \
-             unsigned short: diff_details_ushort,        \
-             int: diff_details_int,                      \
-             unsigned int: diff_details_uint,            \
-             long: diff_details_long,                    \
-             unsigned long: diff_details_ulong,          \
-             long long: diff_details_llong,              \
-             unsigned long long: diff_details_ullong,    \
-             float: diff_details_float,                  \
-             double: diff_details_double,                \
-             long double: diff_details_ldouble,          \
-             char *: diff_details_string,                \
-             const char *: diff_details_string,          \
-             bool: diff_details_bool,                    \
-             default: diff_details_ptr*/
 #endif

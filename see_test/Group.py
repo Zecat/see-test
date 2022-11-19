@@ -195,22 +195,23 @@ class TestCallExpression:
         expect_assertions = []
         fn_name = self.get_node_text(name_node)
 
+        real_fn_name = self.function_aliases.get(fn_name, fn_name) 
+        test_str = self.get_node_text(node).replace('"','\\"') # TODO resolve values when possible
+        # replace the alias name with the real fn name 
+        re.sub(r".+\(", real_fn_name + '(', test_str, count=1)
+        line, charet = node.start_point
+        self.test_str='"'+test_str+'"'
+        self.relpath = '"'+os.path.relpath(self.path)+'"'
+        self.line = line;
+        self.charet = charet;
+
         for arg_node in args_node.named_children:
             arg_def, *arg_expect_assertions = self.stack(arg_node)
             expect_assertions += arg_expect_assertions
             arg_names.append(f"{arg_def[0]}")
 
-        real_fn_name = self.function_aliases.get(fn_name, fn_name) 
         fcall_str = c.fcall(real_fn_name, arg_names)
 
-        test_str = self.get_node_text(node).replace('"','\\"') # TODO resolve values when possible
-        # replace the alias name with the real fn name 
-        re.sub(r".+\(", real_fn_name + '(', test_str, count=1)
-        line, charet = arg_node.start_point
-        self.test_str='"'+test_str+'"'
-        self.relpath = '"'+os.path.relpath(self.path)+'"'
-        self.line = line;
-        self.charet = charet;
 
         if expect_return_node:
             expect_return_text = self.get_node_text(expect_return_node)
@@ -463,6 +464,7 @@ def generate_cmut_file(path_in, path_out, path_shift=None):
 
 #include "capture_macro.h"
 #include "auto_assert.h"
+#include "catch_segfault.h"
 
 INIT_EXCEPTION
 CAPTURE_INIT_EXTERN

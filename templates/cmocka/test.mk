@@ -1,10 +1,10 @@
 NAME = test.out
 
 SRC += $(TESTS)
-SRC += main.c auto_assert.c assertion.c
+SRC += main.c auto_assert.c test_list.c test_fn_list.c utils.c assert_handler.c print_test_report.c
 
 CC = gcc
-CFLAGS += -g -Wall -Wextra -Werror -I ~/.local/include
+CFLAGS += -g -I ~/.local/include
 LDLIBS += -lcmocka# -ltap
 LDFLAGS += -L$(HOME)/.local/lib
 #export LD_LIBRARY_PATH=$(HOME)/.local/lib:$LD_LIBRARY_PATH

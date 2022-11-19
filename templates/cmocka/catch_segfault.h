@@ -13,8 +13,9 @@
 #define TRY \
   if(!setjmp(restore_point)) { \
     org_handler = signal(SIGSEGV, skip_segfault); \
+    printf("%s", "==="); \
 
 #define CATCH \
     signal(SIGSEGV, org_handler); \
-  } else \
+  } else
 

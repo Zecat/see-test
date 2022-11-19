@@ -1,6 +1,5 @@
-#include "assertion.h"
+#include "test_list.h"
 #include <stdlib.h>
-#include <stdio.h>
 
 assertion_list_t *add_assertion(assertion_list_t **assertion_list) {
   assertion_list_t *assertion = malloc(sizeof(assertion_list_t));

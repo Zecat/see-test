@@ -43,16 +43,16 @@ class CmockaTester:
             test_dirpath / "capture_macro.h",
         )
         shutil.copy(
-            self.get_template_dir() / "assertion.c",
-            test_dirpath / "assertion.c",
-        )
-        shutil.copy(
-            self.get_template_dir() / "assertion.h",
-            test_dirpath / "assertion.h",
-        )
-        shutil.copy(
             self.get_template_dir() / "auto_assert.c",
             test_dirpath / "auto_assert.c",
+        )
+        shutil.copy(
+            self.get_template_dir() / "assert_handler.h",
+            test_dirpath / "assert_handler.h",
+        )
+        shutil.copy(
+            self.get_template_dir() / "assert_handler.c",
+            test_dirpath / "assert_handler.c",
         )
         shutil.copy(
             self.get_template_dir() / "auto_assert.h",
@@ -61,6 +61,42 @@ class CmockaTester:
         shutil.copy(
             self.get_template_dir() / "catch_segfault.h",
             test_dirpath / "catch_segfault.h",
+        )
+        shutil.copy(
+            self.get_template_dir() / "print_test_report.h",
+            test_dirpath / "print_test_report.h",
+        )
+        shutil.copy(
+            self.get_template_dir() / "print_test_report.c",
+            test_dirpath / "print_test_report.c",
+        )
+        shutil.copy(
+            self.get_template_dir() / "print_style_macro.h",
+            test_dirpath / "print_style_macro.h",
+        )
+        shutil.copy(
+            self.get_template_dir() / "test_fn_list.c",
+            test_dirpath / "test_fn_list.c",
+        )
+        shutil.copy(
+            self.get_template_dir() / "test_fn_list.h",
+            test_dirpath / "test_fn_list.h",
+        )
+        shutil.copy(
+            self.get_template_dir() / "test_list.c",
+            test_dirpath / "test_list.c",
+        )
+        shutil.copy(
+            self.get_template_dir() / "test_list.h",
+            test_dirpath / "test_list.h",
+        )
+        shutil.copy(
+            self.get_template_dir() / "utils.c",
+            test_dirpath / "utils.c",
+        )
+        shutil.copy(
+            self.get_template_dir() / "utils.h",
+            test_dirpath / "utils.h",
         )
         self.update()
 
