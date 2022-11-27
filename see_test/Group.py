@@ -277,7 +277,7 @@ class TestSubgroupTS:
             elif child_node.type == "call_expression":
                 self.body.append(
                     TestCallExpression(
-                        child_node, vars_counter, self.get_node_text, path, function_aliases
+                        child_node, vars_counter, self.get_node_text, path, self.function_aliases
                     )
                 )
             elif child_node.type == "function_alias_definition":
